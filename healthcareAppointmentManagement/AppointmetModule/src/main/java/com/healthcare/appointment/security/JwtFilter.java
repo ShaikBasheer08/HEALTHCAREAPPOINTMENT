@@ -31,8 +31,10 @@ public class JwtFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
+        System.out.println("Request to: " + request.getRequestURI()); // Log the requested URI
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            System.out.println("Authorization header missing or invalid.");
             chain.doFilter(request, response);
             return;
         }
@@ -46,33 +48,23 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Extract user details from JWT
         String username = jwtUtil.extractEmail(token);
         String roles = jwtUtil.extractRoles(token);
+        System.out.println("Extracted username: " + username + ", roles: " + roles);
 
-        // Convert roles to GrantedAuthority list
-       // List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + roles));
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(
-        	    roles.startsWith("ROLE_") ? roles : "ROLE_" + roles
-        	));
+            roles.startsWith("ROLE_") ? roles : "ROLE_" + roles
+        ));
+        System.out.println("Granted Authorities: " + authorities);
 
-
-        // Create UserDetails object
         UserDetails userDetails = new User(username, "N/A", authorities);
-        System.out.println("User authenticated: " + username + " with roles: " + authorities);
-
-        // Set authentication in security context
         UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(userDetails, token, authorities);
         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-       // SecurityContextHolder.getContext().setAuthentication(authToken);
         SecurityContextHolder.getContext().setAuthentication(authToken);
-        System.out.println("Security Context Authentication: " + SecurityContextHolder.getContext().getAuthentication());
+        System.out.println("Security Context Authentication set: " + SecurityContextHolder.getContext().getAuthentication());
 
-
-        // Store JWT token in request attributes for Feign clients
         request.setAttribute("jwtToken", token);
-
         chain.doFilter(request, response);
     }
 }

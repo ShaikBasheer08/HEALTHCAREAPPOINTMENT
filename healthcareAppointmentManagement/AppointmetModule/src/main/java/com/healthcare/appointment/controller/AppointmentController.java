@@ -22,9 +22,6 @@ import java.util.Optional;
 /**
  * Controller for managing appointments.
  * 
- * @Author Basheer
- * @Since 2025-03-18
- * @Description This class handles user authentication.
  */
 
 @Slf4j

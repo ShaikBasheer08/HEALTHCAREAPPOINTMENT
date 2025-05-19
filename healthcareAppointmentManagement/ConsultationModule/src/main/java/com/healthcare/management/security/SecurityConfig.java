@@ -26,6 +26,7 @@ public class SecurityConfig {
                 // 🔐 Restrict consultation creation to "DOCTOR" role only
             		.requestMatchers(HttpMethod.POST, "/consultation/createcon").hasRole("DOCTOR")
                 // ✅ Allow other API calls but require authentication
+            		.requestMatchers("/appointment/{appId}").hasRole("DOCTOR")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class) // Add JWT authentication filter
